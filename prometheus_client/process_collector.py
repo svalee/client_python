@@ -21,7 +21,7 @@ class ProcessCollector(object):
 
     def __init__(self, namespace='', pid=lambda: 'self', proc='/proc', registry=REGISTRY):
         self._namespace = namespace
-        self._pid = [pid for pid in os.listdir('/proc') if pid.isdigit()]
+        self._pid = pid
         self._proc = proc
         if namespace:
             self._prefix = namespace + '_process_'
@@ -56,7 +56,7 @@ class ProcessCollector(object):
         rss_value = 0
         parts = None
 
-        for p in self._pid:
+        for p in [pid for pid in os.listdir('/proc') if pid.isdigit()]:
             pid = os.path.join(self._proc, str(p))
             try:
                 with open(os.path.join(pid, 'stat'), 'rb') as stat:
