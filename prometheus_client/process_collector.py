@@ -64,7 +64,7 @@ class ProcessCollector(object):
 
                 vmem_value += float(parts[20])
 
-                rss_value = float(parts[21]) * _PAGESIZE
+                rss_value += float(parts[21]) * _PAGESIZE
             except IOError:
                 pass
 
