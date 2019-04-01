@@ -54,6 +54,7 @@ class ProcessCollector(object):
         result = []
         vmem_value = 0
         rss_value = 0
+        cpu_value = 0
         parts = None
 
         for p in [pid for pid in os.listdir('/proc') if pid.isdigit()]:
@@ -65,6 +66,10 @@ class ProcessCollector(object):
                 vmem_value += float(parts[20])
 
                 rss_value += float(parts[21]) * _PAGESIZE
+
+                utime = float(parts[11]) / self._ticks
+                stime = float(parts[12]) / self._ticks
+                cpu_value += utime + stime
             except IOError:
                 pass
 
@@ -79,17 +84,17 @@ class ProcessCollector(object):
                                            value=0)
         cpu = CounterMetricFamily(self._prefix + 'cpu_seconds_total',
                                       'Total user and system CPU time spent in seconds.',
-                                      value=0)
+                                      value=cpu_value)
         if parts:
             start_time_secs = float(parts[19]) / self._ticks
             start_time = GaugeMetricFamily(self._prefix + 'start_time_seconds',
                                            'Start time of the process since unix epoch in seconds.',
                                            value=start_time_secs + self._btime)
-            utime = float(parts[11]) / self._ticks
-            stime = float(parts[12]) / self._ticks
-            cpu = CounterMetricFamily(self._prefix + 'cpu_seconds_total',
-                                      'Total user and system CPU time spent in seconds.',
-                                      value=utime + stime)
+            # utime = float(parts[11]) / self._ticks
+            # stime = float(parts[12]) / self._ticks
+            # cpu = CounterMetricFamily(self._prefix + 'cpu_seconds_total',
+            #                           'Total user and system CPU time spent in seconds.',
+            #                           value=utime + stime)
         result.extend([vmem, rss, start_time, cpu])
 
         # try:
